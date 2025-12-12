@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-	[string]$RepoUrl = "https://github.com/USERNAME/WindowsAutomation.git",
+	[string]$RepoUrl = "https://github.com/fatihemreakardere/WindowsAutomation.git",
 	[string]$TargetDir = (Join-Path $env:USERPROFILE "git/WindowsAutomation")
 )
 
