@@ -4,10 +4,14 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 
 ## Quick start
 
-1. **Bootstrap:** installs Git (via winget if needed), clones/updates this repo, and calls `setup.ps1`.
+1. **Bootstrap (first-time on a fresh Windows 11):**
 
+   - Open **PowerShell as Administrator**.
+   - Run: `irm "https://raw.githubusercontent.com/fatihemreakardere/WindowsAutomation/main/bootstrap.ps1" | iex`
+     - This downloads and runs `bootstrap.ps1` directly (no Git required yet).
+   - What it does: installs Git (via winget if needed), clones/updates this repo, and calls `setup.ps1`.
    - Default clone: `%USERPROFILE%\git\WindowsAutomation` (override with `-TargetDir`).
-   - Example: `powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -RepoUrl "<your repo url>"`
+   - If you already cloned the repo, you can also run: `powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -RepoUrl "<your repo url>"`
 
 2. **Setup:** runs WinUtil with the provided config, then executes any scripts in `scripts/`.
    - Example: `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -ConfigPath .\config\winutil.json -ScriptsDir .\scripts`
