@@ -8,6 +8,14 @@ $Apps = @(
     @{ Name = 'Spotify';  Url = 'https://open.spotify.com' }
 )
 
+# Global Chromium flags to apply to every PWA shortcut
+$GlobalFlags = @(
+    '--ignore-gpu-blocklist',
+    '--enable-accelerated-video-decode',
+    # Media / GPU / HDR / controls / file-handling
+    '--enable-features=PlatformHEVCDecoderSupport,PlatformVP9Decoder,WebRTCHWDecoding,HardwareMediaKeyHandling,GlobalMediaControls,UseWindowsHDR,FileHandlingAPI'
+)
+
 function Write-Info($Message)  { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
 function Write-Warn($Message)  { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
 function Write-ErrorAndExit($Message) {
@@ -58,17 +66,27 @@ function New-PwaShortcut {
     param(
         [string]$Name,
         [string]$Url,
-        [string]$BrowserPath
+        [string]$BrowserPath,
+        [string[]]$Flags = @()
     )
 
     $shortcutDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\PWA'
     if (-not (Test-Path $shortcutDir)) { New-Item -ItemType Directory -Path $shortcutDir -Force | Out-Null }
     $shortcutPath = Join-Path $shortcutDir "$Name.lnk"
 
+    $baseArgs = @(
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--profile-directory=Default',
+        "--app=$Url"
+    )
+
+    $allArgs = @($baseArgs + $Flags + $GlobalFlags)
+
     $shell = New-Object -ComObject WScript.Shell
     $sc = $shell.CreateShortcut($shortcutPath)
     $sc.TargetPath = $BrowserPath
-    $sc.Arguments  = "--no-first-run --no-default-browser-check --profile-directory=Default --app=$Url"
+    $sc.Arguments  = ($allArgs -join ' ')
     $sc.WorkingDirectory = Split-Path $BrowserPath -Parent
     $sc.IconLocation = "$BrowserPath,0"
     $sc.Save()
@@ -89,19 +107,20 @@ function Install-Pwa {
     param(
         [string]$BrowserPath,
         [string]$Name,
-        [string]$Url
+        [string]$Url,
+        [string[]]$Flags = @()
     )
 
     $shortcutPath = Join-Path (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\PWA') "$Name.lnk"
     if (Test-Path $shortcutPath) {
-        Write-Info "PWA '$Name' shortcut already present."
-        return
+        Write-Info "PWA '$Name' shortcut present; recreating with current flags/settings..."
+        Remove-Item $shortcutPath -ErrorAction SilentlyContinue
     }
 
     Ensure-ChromiumProfileInitialized -BrowserPath $BrowserPath
 
     Write-Info "Creating PWA shortcut for '$Name'..."
-    $created = New-PwaShortcut -Name $Name -Url $Url -BrowserPath $BrowserPath
+    $created = New-PwaShortcut -Name $Name -Url $Url -BrowserPath $BrowserPath -Flags $Flags
     if (-not (Test-Path $created)) {
         Write-Warn "Shortcut creation for '$Name' may have failed. Verify manually."
     }
@@ -118,7 +137,9 @@ if (-not $chromium) {
 }
 
 foreach ($app in $Apps) {
-    Install-Pwa -BrowserPath $chromium -Name $app.Name -Url $app.Url
+    $flags = @()
+    if ($app.ContainsKey('Flags')) { $flags = $app.Flags }
+    Install-Pwa -BrowserPath $chromium -Name $app.Name -Url $app.Url -Flags $flags
 }
 
 Write-Info "PWA installation pass complete."
