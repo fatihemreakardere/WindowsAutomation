@@ -20,7 +20,7 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 
 - `scripts/01_install_wsl_ubuntu.ps1` — Enable WSL + VirtualMachinePlatform, set WSL2 default, install Ubuntu distro (admin; reboot may be required on first enablement).
 - `scripts/02_install_python_multi.ps1` — Install Python 3.11/3.12/3.13 via winget if missing (admin).
-- `scripts/03_install_pwas.ps1` — Install PWAs (Notion, Discord, WhatsApp, Spotify) via Chromium (Hibbiki.Chromium). Creates Start Menu shortcuts under `Programs\PWA`.
+- `scripts/03_install_pwas.ps1` — Install PWAs (Notion, Discord, WhatsApp, Spotify) via Chromium (Hibbiki.Chromium). Creates Start Menu shortcuts at `%APPDATA%\Microsoft\Windows\Start Menu\Programs\PWA\<App>.lnk`.
 
 Place any additional `.ps1` files in `scripts/`; `setup.ps1` runs them in alphabetical order after WinUtil.
 
