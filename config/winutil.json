@@ -96,10 +96,6 @@
     {
       "winget": "Postman.Postman",
       "choco": "postman"
-    },
-    {
-      "winget": "Git.Git",
-      "choco": "git"
     }
   ],
   "WPFInstall": [
@@ -118,7 +114,6 @@
     "WPFInstallchromium",
     "WPFInstallnodejslts",
     "WPFInstallefibooteditor",
-    "WPFInstallpostman",
-    "WPFInstallgit"
+    "WPFInstallpostman"
   ]
 }
