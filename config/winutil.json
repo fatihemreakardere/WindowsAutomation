@@ -1,0 +1,124 @@
+{
+  "WPFFeature": [
+    "WPFFeatureshyperv"
+  ],
+  "WPFTweaks": [
+    "WPFTweaksRestorePoint",
+    "WPFTweaksServices",
+    "WPFTweaksDeleteTempFiles",
+    "WPFTweaksDVR",
+    "WPFTweaksRemoveGallery",
+    "WPFTweaksDisableLMS1",
+    "WPFTweaksEndTaskOnTaskbar",
+    "WPFTweaksRemoveHome",
+    "WPFTweaksDiskCleanup",
+    "WPFTweaksUTC",
+    "WPFTweaksDisableBGapps",
+    "WPFTweaksEdgeDebloat",
+    "WPFTweaksDisableExplorerAutoDiscovery",
+    "WPFTweaksActivity",
+    "WPFTweaksDisableEdge",
+    "WPFTweaksHiber",
+    "WPFTweaksBraveDebloat",
+    "WPFTweaksRightClickMenu",
+    "WPFTweaksPowershell7",
+    "WPFTweaksLoc",
+    "WPFTweaksStorage",
+    "WPFTweaksPowershell7Tele",
+    "WPFTweaksLaptopHibernation",
+    "WPFTweaksRemoveCopilot",
+    "WPFTweaksRemoveOnedrive",
+    "WPFTweaksWifi",
+    "WPFTweaksDisplay",
+    "WPFTweaksTele"
+  ],
+  "Install": [
+    {
+      "winget": "Docker.DockerDesktop",
+      "choco": "docker-desktop"
+    },
+    {
+      "winget": "7zip.7zip",
+      "choco": "7zip"
+    },
+    {
+      "winget": "TheDocumentFoundation.LibreOffice",
+      "choco": "libreoffice-fresh"
+    },
+    {
+      "winget": "Google.Chrome",
+      "choco": "googlechrome"
+    },
+    {
+      "winget": "Brave.Brave",
+      "choco": "brave"
+    },
+    {
+      "winget": "Microsoft.VisualStudioCode",
+      "choco": "vscode"
+    },
+    {
+      "winget": "Mozilla.Thunderbird",
+      "choco": "thunderbird"
+    },
+    {
+      "winget": "Google.GoogleDrive",
+      "choco": "googledrive"
+    },
+    {
+      "winget": "GitHub.cli",
+      "choco": "git;gh"
+    },
+    {
+      "winget": "na",
+      "choco": "pyenv-win"
+    },
+    {
+      "winget": "CoreyButler.NVMforWindows",
+      "choco": "nvm"
+    },
+    {
+      "winget": "Python.Python.3.13",
+      "choco": "python"
+    },
+    {
+      "winget": "Hibbiki.Chromium",
+      "choco": "chromium"
+    },
+    {
+      "winget": "OpenJS.NodeJS.LTS",
+      "choco": "nodejs-lts"
+    },
+    {
+      "winget": "EFIBootEditor.EFIBootEditor",
+      "choco": "na"
+    },
+    {
+      "winget": "Postman.Postman",
+      "choco": "postman"
+    },
+    {
+      "winget": "Git.Git",
+      "choco": "git"
+    }
+  ],
+  "WPFInstall": [
+    "WPFInstalldockerdesktop",
+    "WPFInstall7zip",
+    "WPFInstalllibreoffice",
+    "WPFInstallchrome",
+    "WPFInstallbrave",
+    "WPFInstallvscode",
+    "WPFInstallthunderbird",
+    "WPFInstallgoogledrive",
+    "WPFInstallgithubcli",
+    "WPFInstallpyenvwin",
+    "WPFInstallnvm",
+    "WPFInstallpython3",
+    "WPFInstallchromium",
+    "WPFInstallnodejslts",
+    "WPFInstallefibooteditor",
+    "WPFInstallpostman",
+    "WPFInstallgit"
+  ]
+}
