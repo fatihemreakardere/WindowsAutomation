@@ -8,6 +8,16 @@ function Write-ErrorAndExit($Message) {
     exit 1
 }
 
+function Show-Progress {
+    param(
+        [string]$Activity,
+        [string]$Status,
+        [int]$PercentComplete = -1,
+        [int]$Id = 50
+    )
+    Write-Progress -Activity $Activity -Status $Status -PercentComplete $PercentComplete -Id $Id
+}
+
 function Assert-Admin {
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
     $p = New-Object Security.Principal.WindowsPrincipal($id)
@@ -25,11 +35,14 @@ function Install-NerdFont {
 
     foreach ($id in $Ids) {
         Write-Info "Trying winget install '$id'..."
+        Show-Progress -Activity "Nerd Font install" -Status "winget: $id" -PercentComplete -1 -Id 51
         $args = @('install', '--id', $id, '--exact', '--source', 'winget', '--accept-package-agreements', '--accept-source-agreements')
         $proc = Start-Process -FilePath 'winget' -ArgumentList $args -PassThru -Wait -WindowStyle Hidden
         if ($proc.ExitCode -eq 0) { return $true }
         Write-Warn "winget install for '$id' exited $($proc.ExitCode)."
     }
+
+    Show-Progress -Activity "Nerd Font install" -Status "winget attempts complete" -PercentComplete 100 -Id 51
 
     return $false
 }
@@ -61,6 +74,7 @@ function Install-NerdFontFromRelease {
     }
 
     Write-Info "Downloading $($asset.name)..."
+    Show-Progress -Activity "Nerd Font install" -Status "Downloading $($asset.name)" -PercentComplete -1 -Id 52
     try {
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $tmpZip -UseBasicParsing
     }
@@ -69,16 +83,21 @@ function Install-NerdFontFromRelease {
         return $false
     }
 
+    Show-Progress -Activity "Nerd Font install" -Status "Download complete" -PercentComplete 50 -Id 52
+
     if (Test-Path $extractDir) { Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue }
     New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
 
     try {
+        Show-Progress -Activity "Nerd Font install" -Status "Extracting archive" -PercentComplete -1 -Id 52
         Expand-Archive -Path $tmpZip -DestinationPath $extractDir -Force
     }
     catch {
         Write-Warn "Extract failed: $($_.Exception.Message)"
         return $false
     }
+
+    Show-Progress -Activity "Nerd Font install" -Status "Installing fonts" -PercentComplete 70 -Id 52
 
     if (-not (Test-Path $userFonts)) { New-Item -ItemType Directory -Path $userFonts -Force | Out-Null }
 
@@ -104,6 +123,7 @@ public class FontUtil {
         [void][FontUtil]::AddFontResourceEx($dest, 0, [IntPtr]::Zero)
     }
 
+    Show-Progress -Activity "Nerd Font install" -Status "Font install complete" -PercentComplete 100 -Id 52
     Write-Info "Installed $FontName Nerd Font to $userFonts. Restart terminal/apps to pick it up; select the font (e.g., '${FontName} NF')."
     return $true
 }

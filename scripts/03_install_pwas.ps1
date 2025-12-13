@@ -22,6 +22,16 @@ function Write-ErrorAndExit($Message) {
     exit 1
 }
 
+function Show-Progress {
+    param(
+        [string]$Activity,
+        [string]$Status,
+        [int]$PercentComplete = -1,
+        [int]$Id = 301
+    )
+    Write-Progress -Activity $Activity -Status $Status -PercentComplete $PercentComplete -Id $Id
+}
+
 function Assert-Admin {
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
     $p = New-Object Security.Principal.WindowsPrincipal($id)
@@ -38,6 +48,7 @@ function Ensure-ChromiumInstalled {
     if (Get-ChromiumPath) { return }
 
     Write-Info "Installing Chromium via winget (Hibbiki.Chromium)..."
+    Show-Progress -Activity "PWA install" -Status "Installing Chromium" -PercentComplete -1 -Id 301
     $args = @(
         'install', '--id', 'Hibbiki.Chromium',
         '--exact', '--source', 'winget',
@@ -47,6 +58,7 @@ function Ensure-ChromiumInstalled {
     if ($proc.ExitCode -ne 0) {
         Write-ErrorAndExit "Chromium install failed (exit $($proc.ExitCode))."
     }
+    Show-Progress -Activity "PWA install" -Status "Chromium installed" -PercentComplete 100 -Id 301
 }
 
 function Get-ChromiumPath {
@@ -99,7 +111,9 @@ function Ensure-ChromiumProfileInitialized {
     $profileDir = Join-Path $env:LOCALAPPDATA 'Chromium\User Data\Default'
     if (Test-Path $profileDir) { return }
     Write-Info "Initializing Chromium profile (Default)..."
+    Show-Progress -Activity "PWA install" -Status "Initializing Chromium profile" -PercentComplete -1 -Id 302
     Start-Process -FilePath $BrowserPath -ArgumentList @('--no-first-run', '--no-default-browser-check', 'about:blank') -WindowStyle Minimized -Wait | Out-Null
+    Show-Progress -Activity "PWA install" -Status "Profile initialized" -PercentComplete 100 -Id 302
 }
 
 function Install-Pwa {
@@ -119,10 +133,12 @@ function Install-Pwa {
     Ensure-ChromiumProfileInitialized -BrowserPath $BrowserPath
 
     Write-Info "Creating PWA shortcut for '$Name'..."
+    Show-Progress -Activity "PWA install" -Status "Creating shortcut for $Name" -PercentComplete -1 -Id 303
     $created = New-PwaShortcut -Name $Name -Url $Url -BrowserPath $BrowserPath -Flags $Flags
     if (-not (Test-Path $created)) {
         Write-Warn "Shortcut creation for '$Name' may have failed. Verify manually."
     }
+    Show-Progress -Activity "PWA install" -Status "$Name shortcut done" -PercentComplete 100 -Id 303
 }
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force | Out-Null

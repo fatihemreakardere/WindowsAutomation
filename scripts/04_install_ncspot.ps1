@@ -8,6 +8,16 @@ function Write-ErrorAndExit($Message) {
     exit 1
 }
 
+function Show-Progress {
+    param(
+        [string]$Activity,
+        [string]$Status,
+        [int]$PercentComplete = -1,
+        [int]$Id = 1
+    )
+    Write-Progress -Activity $Activity -Status $Status -PercentComplete $PercentComplete -Id $Id
+}
+
 function Assert-Admin {
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
     $p = New-Object Security.Principal.WindowsPrincipal($id)
@@ -87,11 +97,13 @@ function Install-NcspotViaWinget {
 
     foreach ($id in $candidates) {
         Write-Info "Trying winget package id '$id'..."
+        Show-Progress -Activity "ncspot install" -Status "winget: $id" -PercentComplete -1 -Id 10
         $args = @('install', '--id', $id, '--exact', '--source', 'winget', '--accept-package-agreements', '--accept-source-agreements')
         $proc = Start-Process -FilePath 'winget' -ArgumentList $args -PassThru -Wait -WindowStyle Hidden
         if ($proc.ExitCode -eq 0) { return $true }
         Write-Warn "winget install for '$id' returned exit code $($proc.ExitCode)."
     }
+    Show-Progress -Activity "ncspot install" -Status "winget attempts complete" -PercentComplete 100 -Id 10
 
     return $false
 }
@@ -99,9 +111,11 @@ function Install-NcspotViaWinget {
 function Install-NcspotViaScoop {
     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) { return $false }
     Write-Info "Trying scoop install ncspot (bucket: extras)..."
+    Show-Progress -Activity "ncspot install" -Status "scoop: ncspot" -PercentComplete -1 -Id 11
     $proc = Start-Process -FilePath 'scoop' -ArgumentList @('install', 'ncspot') -PassThru -Wait -WindowStyle Hidden
     if ($proc.ExitCode -eq 0) { return $true }
     Write-Warn "scoop install returned exit code $($proc.ExitCode)."
+    Show-Progress -Activity "ncspot install" -Status "scoop attempt complete" -PercentComplete 100 -Id 11
     return $false
 }
 
@@ -111,6 +125,7 @@ function Ensure-RustupInstalled {
     $rustupIds = @('Rustlang.Rustup', 'Rustlang.Rustup.MSVC')
     foreach ($id in $rustupIds) {
         Write-Info "Trying winget install rustup with id '$id'..."
+        Show-Progress -Activity "ncspot install" -Status "rustup via winget: $id" -PercentComplete -1 -Id 12
         $args = @('install', '--id', $id, '--exact', '--source', 'winget', '--accept-package-agreements', '--accept-source-agreements')
         $proc = Start-Process -FilePath 'winget' -ArgumentList $args -PassThru -Wait -WindowStyle Hidden
         if ($proc.ExitCode -eq 0) {
@@ -120,6 +135,7 @@ function Ensure-RustupInstalled {
         }
         Write-Warn "rustup install via winget ($id) exit code $($proc.ExitCode)."
     }
+    Show-Progress -Activity "ncspot install" -Status "rustup attempts complete" -PercentComplete 100 -Id 12
 
     return $false
 }
@@ -132,12 +148,14 @@ function Install-NcspotViaCargo {
     }
 
     Write-Info "Trying cargo install ncspot (may take a few minutes)..."
+    Show-Progress -Activity "ncspot install" -Status "cargo install ncspot" -PercentComplete -1 -Id 13
     $logOut = Join-Path $env:TEMP 'ncspot_cargo_install.log'
     $logErr = Join-Path $env:TEMP 'ncspot_cargo_install.err.log'
     $psiArgs = @('install', 'ncspot', '--locked')
     $proc = Start-Process -FilePath (Get-CargoCommand).Source -ArgumentList $psiArgs -PassThru -Wait -WindowStyle Hidden -RedirectStandardError $logErr -RedirectStandardOutput $logOut
     if ($proc.ExitCode -eq 0) { return $true }
     Write-Warn "cargo install ncspot returned exit code $($proc.ExitCode). See $logOut and $logErr for details (common causes: missing MSVC build tools, OpenSSL headers, or git)."
+    Show-Progress -Activity "ncspot install" -Status "cargo attempt complete" -PercentComplete 100 -Id 13
     return $false
 }
 
@@ -163,6 +181,7 @@ function Install-NcspotFromRelease {
     }
 
     Write-Info "Downloading release asset '$($asset.name)'..."
+    Show-Progress -Activity "ncspot install" -Status "Downloading $($asset.name)" -PercentComplete -1 -Id 14
     try {
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $tmp -UseBasicParsing
     }
@@ -170,12 +189,14 @@ function Install-NcspotFromRelease {
         Write-Warn "Download failed: $($_.Exception.Message)"
         return $false
     }
+    Show-Progress -Activity "ncspot install" -Status "Download complete" -PercentComplete 50 -Id 14
 
     if (-not (Test-Path $tmp)) { Write-Warn "Download temp file missing."; return $false }
 
     if (-not (Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
 
     try {
+        Show-Progress -Activity "ncspot install" -Status "Extracting archive" -PercentComplete -1 -Id 14
         Expand-Archive -Path $tmp -DestinationPath $targetDir -Force
     }
     catch {
@@ -183,6 +204,7 @@ function Install-NcspotFromRelease {
         $seven = Get-7ZipCommand
         if ($seven) {
             Write-Warn "Expand-Archive failed, trying 7z..."
+            Show-Progress -Activity "ncspot install" -Status "Extracting with 7z" -PercentComplete -1 -Id 14
             & $seven x $tmp "-o$targetDir" -y | Out-Null
         }
         else {
@@ -191,12 +213,15 @@ function Install-NcspotFromRelease {
         }
     }
 
+    Show-Progress -Activity "ncspot install" -Status "Extraction complete" -PercentComplete 90 -Id 14
+
     $exe = Get-ChildItem -Path $targetDir -Recurse -Filter 'ncspot.exe' | Select-Object -First 1
     if (-not $exe) { Write-Warn "ncspot.exe not found after extraction."; return $false }
 
     # add to PATH for current session
     $env:PATH = "$($exe.DirectoryName);$($env:PATH)"
     Write-Info "ncspot extracted to $($exe.DirectoryName) and added to PATH for this session. Add it to your user PATH to persist."
+    Show-Progress -Activity "ncspot install" -Status "Release install complete" -PercentComplete 100 -Id 14
     return $true
 }
 
