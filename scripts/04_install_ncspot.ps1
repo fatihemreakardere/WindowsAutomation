@@ -25,9 +25,9 @@ function Assert-Admin {
     Write-ErrorAndExit "Run as Administrator (winget installs require elevation)."
 }
 
-function Ensure-Winget {
+function Ensure-WingetPresent {
     if (Get-Command winget -ErrorAction SilentlyContinue) { return }
-    Write-ErrorAndExit "winget is required. Install from Microsoft Store (App Installer) and retry."
+    Write-ErrorAndExit "winget not found. Run scripts/00_ensure_winget.ps1 first."
 }
 
 function Get-NcspotCommand {
@@ -231,7 +231,7 @@ function Ensure-NcspotInstalled {
         return
     }
 
-    Ensure-Winget
+    Ensure-WingetPresent
 
     $installed = Install-NcspotViaWinget
     if (-not $installed) {

@@ -25,6 +25,11 @@ function Assert-Admin {
     Write-ErrorAndExit "This script must be run as Administrator (needed for WSL enablement)."
 }
 
+function Ensure-WingetPresent {
+    if (Get-Command winget -ErrorAction SilentlyContinue) { return }
+    Write-ErrorAndExit "winget not found. Run scripts/00_ensure_winget.ps1 first."
+}
+
 function Ensure-FeatureEnabled {
     param(
         [Parameter(Mandatory)] [string]$Name
@@ -97,6 +102,7 @@ function Ensure-UbuntuDistro {
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force | Out-Null
 Assert-Admin
+Ensure-WingetPresent
 
 Ensure-WSLFeatures
 Ensure-WSLCore

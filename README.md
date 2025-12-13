@@ -22,6 +22,7 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 
 ## Scripts
 
+- `scripts/00_ensure_winget.ps1` — Run once to confirm `winget` is installed/enabled and refresh sources (requires admin).
 - `scripts/01_install_wsl_ubuntu.ps1` — Enable WSL + VirtualMachinePlatform, set WSL2 default, install Ubuntu distro (admin; reboot may be required on first enablement). Shows progress during feature/WSL/distro steps.
 - `scripts/02_install_python_multi.ps1` — Install Python 3.11/3.12/3.13 via winget if missing (admin). Shows per-version progress.
 - `scripts/03_install_pwas.ps1` — Install PWAs (Notion, Discord, WhatsApp) via Chromium (Hibbiki.Chromium). Creates Start Menu shortcuts at `%APPDATA%\Microsoft\Windows\Start Menu\Programs\PWA\<App>.lnk`. Shows progress for Chromium install/profile init/shortcuts.
