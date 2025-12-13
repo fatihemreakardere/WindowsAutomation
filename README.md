@@ -28,6 +28,8 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 - `scripts/03_install_pwas.ps1` — Install PWAs (Notion, Discord, WhatsApp) via Chromium (Hibbiki.Chromium). Creates Start Menu shortcuts at `%APPDATA%\Microsoft\Windows\Start Menu\Programs\PWA\<App>.lnk`. Shows progress for Chromium install/profile init/shortcuts.
 - `scripts/04_install_ncspot.ps1` — Install ncspot (tries winget → scoop → cargo → GitHub release), writes an opinionated `config.toml` at `%APPDATA%\ncspot\config.toml`, and adds ncspot to PATH.
 - `scripts/05_install_nerd_fonts.ps1` — Install a Nerd Font (FiraCode/Cascadia/Hack via winget, with GitHub fallback for FiraCode NF) so ncspot icons render correctly.
+- `scripts/06_install_heroku_cli.ps1` — Install the Heroku CLI via winget if missing.
+- `scripts/07_install_aws_cli.ps1` — Install the AWS CLI via winget if missing.
 
 Place any additional `.ps1` files in `scripts/`; `setup.ps1` runs them in alphabetical order after WinUtil.
 
