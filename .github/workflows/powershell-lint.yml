@@ -16,9 +16,9 @@ jobs:
       - name: Install PSScriptAnalyzer
         shell: pwsh
         run: |
-          Remove-Module PSScriptAnalyzer -ErrorAction SilentlyContinue
           Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -SkipPublisherCheck -AllowClobber
-          Import-Module PSScriptAnalyzer -Force
+          $pssa = Import-Module PSScriptAnalyzer -Force -PassThru
+          Write-Host "Using PSScriptAnalyzer version $($pssa.Version)"
 
       - name: Run PSScriptAnalyzer on scripts
         shell: pwsh
@@ -29,7 +29,8 @@ jobs:
             Write-Host "No PowerShell scripts found under ./scripts."
             exit 0
           }
-          Invoke-ScriptAnalyzer -Path $files -Recurse -Severity Error,Warning
+          [string[]]$paths = $files
+          Invoke-ScriptAnalyzer -Path $paths -Recurse -Severity Error,Warning
 
   test:
     runs-on: ubuntu-latest
