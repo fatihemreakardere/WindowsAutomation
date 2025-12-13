@@ -2,10 +2,9 @@
 param()
 
 $Apps = @(
-    @{ Name = 'Notion';   Url = 'https://www.notion.so' },
-    @{ Name = 'Discord';  Url = 'https://discord.com/app' },
-    @{ Name = 'WhatsApp'; Url = 'https://web.whatsapp.com' },
-    @{ Name = 'Spotify';  Url = 'https://open.spotify.com' }
+    @{ Name = 'Notion'; Url = 'https://www.notion.so' },
+    @{ Name = 'Discord'; Url = 'https://discord.com/app' },
+    @{ Name = 'WhatsApp'; Url = 'https://web.whatsapp.com' }
 )
 
 # Global Chromium flags to apply to every PWA shortcut
@@ -16,8 +15,8 @@ $GlobalFlags = @(
     '--enable-features=PlatformHEVCDecoderSupport,PlatformVP9Decoder,WebRTCHWDecoding,HardwareMediaKeyHandling,GlobalMediaControls,UseWindowsHDR,FileHandlingAPI'
 )
 
-function Write-Info($Message)  { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
-function Write-Warn($Message)  { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
+function Write-Info($Message) { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
+function Write-Warn($Message) { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
 function Write-ErrorAndExit($Message) {
     Write-Host "[ERROR] $Message" -ForegroundColor Red
     exit 1
@@ -86,7 +85,7 @@ function New-PwaShortcut {
     $shell = New-Object -ComObject WScript.Shell
     $sc = $shell.CreateShortcut($shortcutPath)
     $sc.TargetPath = $BrowserPath
-    $sc.Arguments  = ($allArgs -join ' ')
+    $sc.Arguments = ($allArgs -join ' ')
     $sc.WorkingDirectory = Split-Path $BrowserPath -Parent
     $sc.IconLocation = "$BrowserPath,0"
     $sc.Save()
@@ -100,7 +99,7 @@ function Ensure-ChromiumProfileInitialized {
     $profileDir = Join-Path $env:LOCALAPPDATA 'Chromium\User Data\Default'
     if (Test-Path $profileDir) { return }
     Write-Info "Initializing Chromium profile (Default)..."
-    Start-Process -FilePath $BrowserPath -ArgumentList @('--no-first-run','--no-default-browser-check','about:blank') -WindowStyle Minimized -Wait | Out-Null
+    Start-Process -FilePath $BrowserPath -ArgumentList @('--no-first-run', '--no-default-browser-check', 'about:blank') -WindowStyle Minimized -Wait | Out-Null
 }
 
 function Install-Pwa {
