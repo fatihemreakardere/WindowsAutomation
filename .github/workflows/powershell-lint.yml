@@ -29,8 +29,10 @@ jobs:
             Write-Host "No PowerShell scripts found under ./scripts."
             exit 0
           }
-          [string[]]$paths = $files
-          Invoke-ScriptAnalyzer -Path $paths -Recurse -Severity Error,Warning
+          foreach ($path in $files) {
+            Write-Host "Analyzing $path"
+            Invoke-ScriptAnalyzer -Path $path -Recurse -Severity Error,Warning
+          }
 
   test:
     runs-on: ubuntu-latest
