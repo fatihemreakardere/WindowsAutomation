@@ -30,6 +30,25 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 
 Place any additional `.ps1` files in `scripts/`; `setup.ps1` runs them in alphabetical order after WinUtil.
 
+## CI
+
+- GitHub Actions workflow: PowerShell lint via PSScriptAnalyzer runs on pushes/PRs to `main` for files under `scripts/`.
+- GitHub Actions workflow: Pester tests (syntax/parse checks for all `scripts/*.ps1`) run on pushes/PRs to `main`.
+
+### Run tests locally
+
+Install Pester (v5+) once per machine, then run:
+
+```pwsh
+pwsh -NoLogo -NoProfile -Command "Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck -AllowClobber; Invoke-Pester -Path tests"
+```
+
+If you already have Pester 5+ installed, you can shorten to:
+
+```pwsh
+pwsh -NoLogo -NoProfile -Command "Invoke-Pester -Path tests"
+```
+
 ## Requirements
 
 - Run PowerShell as Administrator for installs/WSL/WinUtil.

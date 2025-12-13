@@ -1,0 +1,48 @@
+name: PowerShell Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false
+
+      - name: Run PSScriptAnalyzer on scripts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $files = Get-ChildItem -Path ./scripts -Filter '*.ps1' -File -Recurse
+          if (-not $files) {
+            Write-Host "No PowerShell scripts found under ./scripts."
+            exit 0
+          }
+          Invoke-ScriptAnalyzer -Path $files.FullName -Recurse -Severity Error,Warning
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck -Confirm:$false
+
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Invoke-Pester -CI -Path tests
