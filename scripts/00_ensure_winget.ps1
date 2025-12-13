@@ -40,7 +40,8 @@ function Ensure-WingetPresent {
 function Refresh-WingetSources {
     try {
         Show-Progress -Activity "winget ensure" -Status "Updating sources" -PercentComplete -1 -Id 11
-        winget source update | Out-Host
+        # Suppress winget's ANSI progress noise for cleaner logs
+        winget source update --disable-interactivity 1>$null 2>$null
         Show-Progress -Activity "winget ensure" -Status "Sources updated" -PercentComplete 100 -Id 11
     }
     catch {
