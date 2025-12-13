@@ -51,7 +51,7 @@ Assert-Admin
 Invoke-ChildScript '00_ensure_winget.ps1' 1 ' (winget ensure)'
 
 # Core developer CLIs (extend this list as needed)
-Invoke-ChildScript 'devtools/06_install_heroku_cli.ps1' 6 ' (Heroku CLI)'
-Invoke-ChildScript 'devtools/07_install_aws_cli.ps1' 7 ' (AWS CLI)'
+Invoke-ChildScript 'devtools/install_heroku_cli.ps1' 6 ' (Heroku CLI)'
+Invoke-ChildScript 'devtools/install_aws_cli.ps1' 7 ' (AWS CLI)'
 
 # Future: add additional dev tools here (e.g., Azure CLI, gh CLI, kubectl, terraform)
