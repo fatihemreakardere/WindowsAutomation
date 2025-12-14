@@ -28,9 +28,10 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 - `scripts/03_install_pwas.ps1` — Install PWAs (Notion, Discord, WhatsApp) via Chromium (Hibbiki.Chromium). Creates Start Menu shortcuts at `%APPDATA%\Microsoft\Windows\Start Menu\Programs\PWA\<App>.lnk`. Shows progress for Chromium install/profile init/shortcuts.
 - `scripts/04_install_ncspot.ps1` — Install ncspot (tries winget → scoop → cargo → GitHub release), writes an opinionated `config.toml` at `%APPDATA%\ncspot\config.toml`, and adds ncspot to PATH.
 - `scripts/05_install_nerd_fonts.ps1` — Install a Nerd Font (FiraCode/Cascadia/Hack via winget, with GitHub fallback for FiraCode NF) so ncspot icons render correctly.
-- `scripts/08_install_dev_tools.ps1` — Convenience runner that ensures winget, then installs core dev CLIs (Heroku CLI, AWS CLI). Extend here for future dev tooling.
-- `scripts/devtools/install_heroku_cli.ps1` — Install the Heroku CLI via winget if missing (invoked by 08_install_dev_tools.ps1).
-- `scripts/devtools/install_aws_cli.ps1` — Install the AWS CLI via winget if missing (invoked by 08_install_dev_tools.ps1).
+- `scripts/06_install_dev_tools.ps1` — Convenience runner that ensures winget, then installs core dev CLIs (Heroku CLI, AWS CLI). Extend here for future dev tooling.
+- `scripts/07_install_lightshot.ps1` — Install Lightshot, remove Snipping Tool/Snip & Sketch Appx packages, disable Snipping Tool's Print Screen binding, and autostart Lightshot so the Print Screen key launches it.
+- `scripts/devtools/install_heroku_cli.ps1` — Install the Heroku CLI via winget if missing (invoked by 06_install_dev_tools.ps1).
+- `scripts/devtools/install_aws_cli.ps1` — Install the AWS CLI via winget if missing (invoked by 06_install_dev_tools.ps1).
 
 Place any additional `.ps1` files in `scripts/`; `setup.ps1` runs them in alphabetical order after WinUtil.
 
