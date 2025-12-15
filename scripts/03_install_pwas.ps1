@@ -2,10 +2,13 @@
 param()
 
 $Apps = @(
-    @{ Name = 'Notion'; Url = 'https://www.notion.so' },
-    @{ Name = 'Discord'; Url = 'https://discord.com/app' },
-    @{ Name = 'WhatsApp'; Url = 'https://web.whatsapp.com' }
+    @{ Name = 'Notion'; Url = 'https://www.notion.so'; IconUrl = 'https://www.notion.so/front-static/favicon.ico' },
+    @{ Name = 'Discord'; Url = 'https://discord.com/app'; IconUrl = 'https://discord.com/assets/847541504914fd33810e70a0ea73177e.ico' },
+    @{ Name = 'WhatsApp'; Url = 'https://web.whatsapp.com'; IconUrl = 'https://web.whatsapp.com/favicon.ico' }
 )
+
+# Where we cache downloaded icons for the PWA shortcuts
+$IconCacheDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\PWA\icons'
 
 # Global Chromium flags to apply to every PWA shortcut
 $GlobalFlags = @(
@@ -78,7 +81,8 @@ function New-PwaShortcut {
         [string]$Name,
         [string]$Url,
         [string]$BrowserPath,
-        [string[]]$Flags = @()
+        [string[]]$Flags = @(),
+        [string]$IconPath
     )
 
     $shortcutDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\PWA'
@@ -99,10 +103,41 @@ function New-PwaShortcut {
     $sc.TargetPath = $BrowserPath
     $sc.Arguments = ($allArgs -join ' ')
     $sc.WorkingDirectory = Split-Path $BrowserPath -Parent
-    $sc.IconLocation = "$BrowserPath,0"
+    if ($IconPath -and (Test-Path $IconPath)) {
+        $sc.IconLocation = $IconPath
+    }
+    else {
+        $sc.IconLocation = "$BrowserPath,0"
+    }
     $sc.Save()
 
     return $shortcutPath
+}
+
+function Ensure-Icon {
+    param(
+        [string]$Name,
+        [string]$IconUrl
+    )
+
+    if (-not $IconUrl) { return $null }
+
+    if (-not (Test-Path $IconCacheDir)) {
+        New-Item -ItemType Directory -Path $IconCacheDir -Force | Out-Null
+    }
+
+    $extension = [IO.Path]::GetExtension($IconUrl)
+    if (-not $extension) { $extension = '.ico' }
+    $iconPath = Join-Path $IconCacheDir ("$Name$extension")
+
+    try {
+        Invoke-WebRequest -Uri $IconUrl -UseBasicParsing -OutFile $iconPath -ErrorAction Stop | Out-Null
+        return $iconPath
+    }
+    catch {
+        Write-Warn "Failed to download icon for '$Name' from $IconUrl $($_.Exception.Message)"
+        return $null
+    }
 }
 
 function Ensure-ChromiumProfileInitialized {
@@ -121,7 +156,8 @@ function Install-Pwa {
         [string]$BrowserPath,
         [string]$Name,
         [string]$Url,
-        [string[]]$Flags = @()
+        [string[]]$Flags = @(),
+        [string]$IconUrl
     )
 
     $shortcutPath = Join-Path (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\PWA') "$Name.lnk"
@@ -134,7 +170,9 @@ function Install-Pwa {
 
     Write-Info "Creating PWA shortcut for '$Name'..."
     Show-Progress -Activity "PWA install" -Status "Creating shortcut for $Name" -PercentComplete -1 -Id 303
-    $created = New-PwaShortcut -Name $Name -Url $Url -BrowserPath $BrowserPath -Flags $Flags
+    $iconPath = Ensure-Icon -Name $Name -IconUrl $IconUrl
+
+    $created = New-PwaShortcut -Name $Name -Url $Url -BrowserPath $BrowserPath -Flags $Flags -IconPath $iconPath
     if (-not (Test-Path $created)) {
         Write-Warn "Shortcut creation for '$Name' may have failed. Verify manually."
     }
@@ -154,7 +192,9 @@ if (-not $chromium) {
 foreach ($app in $Apps) {
     $flags = @()
     if ($app.ContainsKey('Flags')) { $flags = $app.Flags }
-    Install-Pwa -BrowserPath $chromium -Name $app.Name -Url $app.Url -Flags $flags
+    $iconUrl = $null
+    if ($app.ContainsKey('IconUrl')) { $iconUrl = $app.IconUrl }
+    Install-Pwa -BrowserPath $chromium -Name $app.Name -Url $app.Url -Flags $flags -IconUrl $iconUrl
 }
 
 Write-Info "PWA installation pass complete."
