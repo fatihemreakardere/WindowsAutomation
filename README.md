@@ -10,7 +10,7 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
    - Run:
 
    ```pwsh
-   `irm "https://www.fatihemreakardere.com/winutil" | iex`
+   irm "https://www.fatihemreakardere.com/winutil" | iex
    ```
 
    - This downloads and runs `bootstrap.ps1` directly (no Git required yet).
