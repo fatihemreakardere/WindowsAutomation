@@ -7,8 +7,13 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 1. **Bootstrap (first-time on a fresh Windows 11):**
 
    - Open **PowerShell as Administrator**.
-   - Run: `irm "https://raw.githubusercontent.com/fatihemreakardere/WindowsAutomation/main/bootstrap.ps1" | iex`
-     - This downloads and runs `bootstrap.ps1` directly (no Git required yet).
+   - Run:
+
+   ```pwsh
+   `irm "https://www.fatihemreakardere.com/winutil" | iex`
+   ```
+
+   - This downloads and runs `bootstrap.ps1` directly (no Git required yet).
    - What it does: installs Git (via winget if needed), clones/updates this repo, and calls `setup.ps1`.
    - Default clone: `%USERPROFILE%\git\WindowsAutomation` (override with `-TargetDir`).
    - Modes:
