@@ -1,11 +1,14 @@
 [CmdletBinding()]
 param(
 	[string]$RepoUrl = "https://github.com/fatihemreakardere/WindowsAutomation.git",
-	[string]$TargetDir = (Join-Path $env:USERPROFILE "git/WindowsAutomation")
+	[string]$TargetDir = (Join-Path $env:USERPROFILE "git/WindowsAutomation"),
+	[ValidateSet("winutil", "scripts")]
+	[string]$Mode = "winutil",
+	[switch]$Silent
 )
 
-function Write-Info($Message)  { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
-function Write-Warn($Message)  { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
+function Write-Info($Message) { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
+function Write-Warn($Message) { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
 function Write-ErrorAndExit($Message) {
 	Write-Host "[ERROR] $Message" -ForegroundColor Red
 	exit 1
@@ -45,6 +48,24 @@ function Ensure-GitInstalled {
 	Write-Info "Git installation complete: $(git --version)"
 }
 
+function Prompt-Mode {
+	param([string]$CurrentMode)
+
+	if ($Silent) { return $CurrentMode }
+
+	Write-Host "Choose run mode:" -ForegroundColor Cyan
+	Write-Host "  [W] WinUtil (clone + run setup.ps1)" -ForegroundColor Gray
+	Write-Host "  [S] Scripts only (clone repo, do not run setup)" -ForegroundColor Gray
+	$choice = Read-Host "Enter W/S or press Enter for default [$CurrentMode]"
+
+	switch -Regex ($choice) {
+		'^(?i)w' { return "winutil" }
+		'^(?i)s' { return "scripts" }
+		'' { return $CurrentMode }
+		default { Write-Warn "Unrecognized choice '$choice'. Using default '$CurrentMode'."; return $CurrentMode }
+	}
+}
+
 function Ensure-Repo {
 	param(
 		[string]$Url,
@@ -69,7 +90,8 @@ function Ensure-Repo {
 
 function Run-SetupScript {
 	param(
-		[string]$RepoPath
+		[string]$RepoPath,
+		[switch]$SkipWinUtil
 	)
 
 	$setupPath = Join-Path $RepoPath "setup.ps1"
@@ -79,7 +101,9 @@ function Run-SetupScript {
 	}
 
 	Write-Info "Running setup script..."
-	& powershell -NoProfile -ExecutionPolicy Bypass -File $setupPath
+	$argList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $setupPath)
+	if ($SkipWinUtil) { $argList += '-SkipWinUtil' }
+	& powershell @argList
 	if ($LASTEXITCODE -ne 0) {
 		Write-ErrorAndExit "Setup script failed with exit code $LASTEXITCODE."
 	}
@@ -89,10 +113,21 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force | Out-Null
 
 try {
 	Write-Info "Bootstrap starting..."
+
+	$selectedMode = Prompt-Mode -CurrentMode $Mode
+	Write-Info "Selected mode: $selectedMode"
+
 	Ensure-GitInstalled
 	Ensure-Repo -Url $RepoUrl -Path $TargetDir
-	Run-SetupScript -RepoPath $TargetDir
-	Write-Host "All done!" -ForegroundColor Green
+
+	if ($selectedMode -eq "winutil") {
+		Run-SetupScript -RepoPath $TargetDir
+		Write-Host "All done! (WinUtil setup completed)" -ForegroundColor Green
+	}
+	else {
+		Run-SetupScript -RepoPath $TargetDir -SkipWinUtil
+		Write-Host "All done! (Scripts-only mode: post scripts executed, WinUtil skipped)" -ForegroundColor Green
+	}
 }
 catch {
 	Write-ErrorAndExit $_.Exception.Message

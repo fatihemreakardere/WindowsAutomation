@@ -1,11 +1,23 @@
 [CmdletBinding()]
 param(
-	[string]$ConfigPath = (Join-Path $PSScriptRoot "config/winutil.json"),
-	[string]$ScriptsDir = (Join-Path $PSScriptRoot "scripts")
+	[string]$ConfigPath,
+	[string]$ScriptsDir,
+	[switch]$SkipWinUtil
 )
 
-function Write-Info($Message)  { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
-function Write-Warn($Message)  { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
+# Ensure a reliable script root even if invoked in ways where $PSScriptRoot is empty
+$ScriptRoot = if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+	$PSScriptRoot
+}
+else {
+	Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+
+if (-not $ConfigPath) { $ConfigPath = Join-Path $ScriptRoot "config/winutil.json" }
+if (-not $ScriptsDir) { $ScriptsDir = Join-Path $ScriptRoot "scripts" }
+
+function Write-Info($Message) { Write-Host "[INFO]  $Message"  -ForegroundColor Cyan }
+function Write-Warn($Message) { Write-Host "[WARN]  $Message"  -ForegroundColor Yellow }
 function Write-ErrorAndExit($Message) {
 	Write-Host "[ERROR] $Message" -ForegroundColor Red
 	exit 1
@@ -76,7 +88,12 @@ if (-not (Test-Path $ConfigPath)) {
 }
 
 $resolvedConfig = (Resolve-Path $ConfigPath).ProviderPath
-Invoke-WinUtilAutomation -ResolvedConfig $resolvedConfig
+if (-not $SkipWinUtil) {
+	Invoke-WinUtilAutomation -ResolvedConfig $resolvedConfig
+}
+else {
+	Write-Info "SkipWinUtil flag set. Skipping WinUtil automation."
+}
 Invoke-PostScripts -Path $ScriptsDir
 
 Write-Info "Setup complete."

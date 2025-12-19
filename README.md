@@ -11,10 +11,17 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
      - This downloads and runs `bootstrap.ps1` directly (no Git required yet).
    - What it does: installs Git (via winget if needed), clones/updates this repo, and calls `setup.ps1`.
    - Default clone: `%USERPROFILE%\git\WindowsAutomation` (override with `-TargetDir`).
+   - Modes:
+     - **WinUtil (default):** clone + run `setup.ps1` (WinUtil + post scripts).
+     - **Scripts only:** clone + run `setup.ps1 -SkipWinUtil` (runs `scripts/*.ps1`, skips WinUtil).
+   - Non-interactive examples:
+     - Full (WinUtil): `powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Mode winutil -Silent`
+     - Scripts only: `powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Mode scripts -Silent`
    - If you already cloned the repo, you can also run: `powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -RepoUrl "<your repo url>"`
 
 2. **Setup:** runs WinUtil with the provided config, then executes any scripts in `scripts/`.
    - Example: `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -ConfigPath .\config\winutil.json -ScriptsDir .\scripts`
+   - To skip WinUtil but still run post scripts: `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -SkipWinUtil`
 
 ## Included configs
 
@@ -32,6 +39,8 @@ Bootstrap and automate a fresh Windows setup using WinUtil plus a few helper scr
 - `scripts/07_install_lightshot.ps1` — Install Lightshot, remove Snipping Tool/Snip & Sketch Appx packages, disable Snipping Tool's Print Screen binding, and autostart Lightshot so the Print Screen key launches it.
 - `scripts/devtools/install_heroku_cli.ps1` — Install the Heroku CLI via winget if missing (invoked by 06_install_dev_tools.ps1).
 - `scripts/devtools/install_aws_cli.ps1` — Install the AWS CLI via winget if missing (invoked by 06_install_dev_tools.ps1).
+
+`setup.ps1` executes all scripts in `scripts/` alphabetically after (or instead of, when `-SkipWinUtil`) running WinUtil.
 
 Place any additional `.ps1` files in `scripts/`; `setup.ps1` runs them in alphabetical order after WinUtil.
 
